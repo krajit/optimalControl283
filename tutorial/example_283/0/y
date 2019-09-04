@@ -32,7 +32,7 @@ boundaryField
         // value		uniform 0;
 
         type robin;
-        beta 0.001; // exchange coefficient
+        beta 0.1; // exchange coefficient
         value uniform 0.0; // ambient temperature
     }
 

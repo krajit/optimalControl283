@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
 
 
-    while (runTime.loop() && fabs(J - Jold) > tol)
+    while (runTime.loop() && (fabs(J - Jold) > tol) && (alpha > tol))
     {
         // save old cost value
         Jold = J;
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
         // calculate derivative^2 integrate((lambda*u + beta*p)^2 dv). Why??
         scalar phip0 = gSum(volField * Foam::pow(lambda * uk.internalField() + beta * p.internalField(), 2));
 
-        while (!alphaFound)
+        while ((!alphaFound) && (alpha > tol))
         {
             u = uk - alpha * (lambda * uk + beta * p);
 
@@ -125,6 +125,7 @@ int main(int argc, char *argv[])
 
     runTime++;
     y.write();
+    yd.write();
     p.write();
     u.write();
     uc.write();
