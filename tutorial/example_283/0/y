@@ -28,8 +28,12 @@ boundaryField
 {
     dirichletBoundary
     {
-	type		fixedValue;
-	value		uniform 0;
+        // type		fixedValue;
+        // value		uniform 0;
+
+        type robin;
+        beta 0.001; // exchange coefficient
+        value uniform 0.0; // ambient temperature
     }
 
     backAndFront           

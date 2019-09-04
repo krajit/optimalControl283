@@ -14,6 +14,8 @@ IOdictionary physicalProperties
 dimensionedScalar k(physicalProperties.lookup("k"));
 dimensionedScalar beta(physicalProperties.lookup("beta"));
 dimensionedScalar lambda(physicalProperties.lookup("lambda"));
+dimensionedScalar lambda1(physicalProperties.lookup("lambda1"));
+dimensionedScalar lambda2(physicalProperties.lookup("lambda2"));
 
 
 /***************************************************************************/
@@ -196,3 +198,4 @@ volScalarField uk
 );
 
 
+wordList patchesToIntegrate(physicalProperties.lookup("boundaryPatchList"));

@@ -50,10 +50,13 @@ int main(int argc, char *argv[])
     scalar Jk = 0;
 
 // Compute cost function value
-#include "costFunctionValue.H"
+    #include "costFunctionValue.H"
 
     std::ofstream file("results.csv");
-    file << 0 << "," << J << "," << 0 << nl;
+    file << 0 << "," << J  << nl;
+    file.close();
+
+
 
     while (runTime.loop() && fabs(J - Jold) > tol)
     {
@@ -61,16 +64,17 @@ int main(int argc, char *argv[])
         Jold = J;
 
         // Primal equation
-        solve(fvm::laplacian(k, y) + beta * u + f);
+        solve(fvm::laplacian(k, y) + lambda1*(beta * u) + f);
 
         // Adjoint equation
-        solve(fvm::laplacian(k, p) + y - yd);
+        solve(fvm::laplacian(k, p) + lambda2*(y - yd));
 
         // Save current control
         uk = u;
 
         // calculate current cost
-        Jk = 0.5 * gSum(volField * (Foam::pow(y.internalField() - yd.internalField(), 2) + lambda * Foam::pow(u.internalField(), 2)));
+        #include "costFunctionValue.H"
+        Jk = J;
 
         bool alphaFound = false;
 
@@ -86,24 +90,22 @@ int main(int argc, char *argv[])
                 u[i] = min(u[i], uMax[i]);
                 u[i] = max(u[i], uMin[i]);
             }
-
             u.correctBoundaryConditions();
 
             // get new y
-            solve(fvm::laplacian(k, y) + beta * u + f);
-
+            solve(fvm::laplacian(k, y) + lambda1*(beta * u) + f);
             // get new cost
-            J = 0.5 * gSum(volField * (Foam::pow(y.internalField() - yd.internalField(), 2) + lambda * Foam::pow(u.internalField(), 2)));
+            #include "costFunctionValue.H"
 
+            // backtracking step to find alpha
             if (J <= Jk - c1 * alpha * phip0)
             {
                 Info << "alpha found, alpha = " << alpha << ", J = " << J << ", phip0" << phip0 << endl;
-
                 alphaFound = true;
             }
             else
             {
-                Info << "alpha NOT found, alpha = " << alpha << endl;
+                Info << "alpha NOT found, alpha = " << alpha << ", J = " << J << ", phip0" << phip0 << endl;
                 alpha = c2 * alpha;
             }
         }
@@ -113,11 +115,9 @@ int main(int argc, char *argv[])
              << " - "
              << "Cost variation" << fabs(J - Jold) << endl;
 
+        file.open("results.csv",std::ios::app);
         file << runTime.value() << "," << J << nl;
-
-        uc = -(beta/lambda)*p;
-        udiff = u - uc;
-
+        file.close();
         runTime.write();
     }
 
